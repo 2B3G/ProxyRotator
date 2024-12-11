@@ -19,7 +19,7 @@
         <!-- Password Field -->
         <HBox spacing="5" fx:id="passwordContainer">
             <PasswordField fx:id="password" promptText="Enter Password" HBox.hgrow="ALWAYS" />
-            <Button fx:id="toggleButton" onAction="#togglePasswordVisibility" />
+            <Button fx:id="toggleButton" />
         </HBox>
 
         <!-- Login Button -->
