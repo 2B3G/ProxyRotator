@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.example.proxyrotator.Controllers.LoginController">
+
+    <VBox alignment="CENTER" spacing="10"  maxWidth="400" prefWidth="400">
+        <Label text="Login" style="-fx-font-size: 24px; -fx-font-weight: bold;" styleClass="text"/>
+
+        <!-- Username TextField -->
+        <TextField fx:id="email" promptText="Enter Email" />
+
+        <!-- Password Field -->
+        <HBox spacing="5" fx:id="passwordContainer">
+            <PasswordField fx:id="password" promptText="Enter Password" HBox.hgrow="ALWAYS" />
+            <Button fx:id="toggleButton" onAction="#togglePasswordVisibility" />
+        </HBox>
+
+        <!-- Login Button -->
+        <Button text="Login" onAction="#login" style="-fx-font-size: 14px;"/>
+
+        <TextFlow textAlignment="CENTER">
+            <Text text="Don't have an account? Register " styleClass="text"/>
+            <Hyperlink text="here" onMouseClicked="#goRegister" styleClass="text"/>
+        </TextFlow>
+
+        <!-- Error Message Label -->
+        <Label fx:id="errorLabel" textFill="red" styleClass="text"/>
+    </VBox>
+</StackPane>

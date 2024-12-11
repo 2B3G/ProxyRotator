@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html, body{
+        height: 100%;
+        width: 100%;
+      }
+
+      body{
+        margin: 0;
+      }
+    </style>
+    <title>Document</title>
+  </head>
+  <body>
+    <object type="image/svg+xml" data="worldmap.svg" id="world-map">
+      Your browser does not support SVG
+    </object>
+
+    <script>
+      let xOffset = 0,
+        yOffset = 0;
+      document.body.style.overflow = "hidden";
+
+      document.querySelector("#world-map").onload = () => {
+        java.log("SVG loaded");
+        alert("SVG loaded");
+
+        return;
+        const doc = document.querySelector("#world-map").contentDocument;
+
+        // let ids = [];
+        // Array.from(doc.querySelectorAll("svg *")).forEach((elem) => {
+        //   if (elem.id.length == 2) ids.push(elem.id);
+        // });
+
+        // console.log(ids);
+
+        const country = prompt(
+          "Type the country short name eg. GB (great brittain)"
+        );
+
+        const path = doc.querySelector("#" + country);
+        const svg = doc.querySelector("svg");
+
+        if (path == null) return alert("Invalid country name");
+
+        const centroid = getCentroid(path);
+        const box = svg.getBoundingClientRect();
+        var centerX = Math.round(box.left + box.width / 2); // x-coordinate of the center
+        var centerY = Math.round(box.top + box.height / 2); // y-coordinate of the center
+
+        xOffset = centerX - centroid.x;
+        yOffset = centerY - centroid.y;
+
+        xOffset = Math.round(xOffset);
+        yOffset = Math.round(yOffset);
+
+        console.log(box, centroid, centerX, centerY, xOffset, yOffset);
+
+        center(svg, centerX, centerY);
+
+        drawPoint(centroid.x, centroid.y, doc);
+
+        svg.style.transform = "translateX(" + xOffset + "px)";
+      };
+
+      function center(svg, xOff, yOff) {
+        var viewportWidth = window.innerWidth;
+        var viewportHeight = window.innerHeight;
+
+        // Position the SVG in the center of the screen
+        svg.style.left = viewportWidth / 2 - xOff / 2 + "px";
+        svg.style.top = viewportHeight / 2 - yOff / 2 + "px";
+      }
+
+      function getCentroid(path) {
+        // Get the total length of the path
+        const pathLength = path.getTotalLength();
+
+        // Variables to accumulate the weighted x and y coordinates of the path's points
+        let x = 0,
+          y = 0,
+          area = 0;
+
+        // Sample the path at intervals
+        const sampleCount = 100; // Number of points to sample along the path
+        for (let i = 0; i < sampleCount; i++) {
+          // Get the position at a given point along the path
+          const point = path.getPointAtLength((i / sampleCount) * pathLength);
+
+          // Calculate the "weighted" area contribution (each segment contributes equally in a simple path)
+          x += point.x;
+          y += point.y;
+          area++;
+        }
+
+        // Return the average position of the sampled points
+        return { x: x / area, y: y / area };
+      }
+
+      function drawPoint(x, y, doc) {
+        var circle = doc.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+        circle.setAttribute("cx", x); // Set the center x-coordinate
+        circle.setAttribute("cy", y); // Set the center y-coordinate
+        circle.setAttribute("r", "10"); // Set the radius
+        circle.setAttribute("fill", "red"); // Set the fill color
+
+        doc.querySelector("svg").appendChild(circle);
+      }
+    </script>
+  </body>
+</html>

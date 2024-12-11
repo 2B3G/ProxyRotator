@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
+<BorderPane fx:id="mainContainer" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.proxyrotator.Controllers.MainController">
+   <left>
+      <VBox spacing="5.0" styleClass="proxy-list" BorderPane.alignment="CENTER">
+         <Label alignment="CENTER" prefHeight="53.0" prefWidth="180.0" style="-fx-font-weight: bold; -fx-font-size: 2em; -fx-text-fill: white; -fx-font-family: arial;" text="Proxy Rotator" textAlignment="CENTER">
+            <padding>
+               <Insets bottom="10.0" top="10.0" />
+            </padding></Label>
+         <HBox alignment="CENTER" prefHeight="76.0" prefWidth="180.0">
+            <VBox alignment="CENTER_LEFT" prefHeight="48.0" prefWidth="168.0" spacing="5.0" styleClass="filters">
+               <TextField fx:id="proxySearch" promptText="Search Adress" styleClass="address-filter">
+                  <font>
+                     <Font name="Arial" size="12.0" />
+                  </font>
+               </TextField>
+               <ComboBox fx:id="countryChoice" prefHeight="27.0" prefWidth="162.0" promptText="Country" styleClass="country-filter">
+                  <cursor>
+                     <Cursor fx:constant="HAND" />
+                  </cursor>
+               </ComboBox>
+            </VBox>
+            <VBox.margin>
+               <Insets bottom="10.0" />
+            </VBox.margin>
+         </HBox>
+         <Separator prefHeight="0.0" style="-fx-background-radius: 10;" />
+         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minHeight="150.0" prefWidth="180.0" style="-fx-background: null;" VBox.vgrow="ALWAYS">
+            <VBox fx:id="proxyContainer" alignment="TOP_CENTER" prefWidth="179.0" spacing="5.0" style="-fx-padding: 5;" />
+         </ScrollPane>
+         <HBox alignment="CENTER" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" style="-fx-background-color: transparent;">
+            <Button onMouseClicked="#logout" styleClass="toolbar-actions">
+               <graphic>
+                  <ImageView accessibleText="Logout" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <Image url="@assets/icons/logout.png" />
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Logout" />
+               </tooltip>
+               <cursor>
+                  <Cursor fx:constant="DEFAULT" />
+               </cursor>
+            </Button>
+            <Button fx:id="refreshBtn" styleClass="toolbar-actions">
+               <graphic>
+                  <ImageView accessibleText="Check Proxies" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <Image url="@assets/icons/refresh.png" />
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Check Proxies" />
+               </tooltip>
+            </Button>
+            <Button fx:id="addBtn" styleClass="toolbar-actions">
+               <graphic>
+                  <ImageView accessibleText="Add proxies" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <Image url="@assets/icons/add.png" />
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Add proxies" />
+               </tooltip>
+            </Button>
+         </HBox>
+      </VBox>
+   </left>
+   <center>
+      <StackPane BorderPane.alignment="CENTER" fx:id="webviewContainer">
+         <WebView fx:id="mapContainer" StackPane.alignment="CENTER"/>
+      </StackPane>
+   </center>
+</BorderPane>

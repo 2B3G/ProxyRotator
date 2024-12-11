@@ -1,0 +1,98 @@
+* {
+    -fx-font-smoothing-type: gray;
+    -fx-font-family: arial;
+}
+
+.proxy-list {
+    -fx-background-color: #0B192C;
+}
+
+.title {
+    -fx-font-size: 24px;
+    -fx-text-fill: white;
+    -fx-padding: 5;
+    -fx-alignment: center;
+}
+
+.filters {
+    -fx-border-color: white;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1.5;
+    -fx-padding: 5;
+}
+
+.combo-box-base {
+    -fx-background-color: transparent;
+    -fx-font-size: 14px;
+    -fx-border-color: white;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-text-fill: white;
+}
+
+.combo-box .list-view{
+    -fx-background-color: #1E344A;
+    -fx-text-fill: white;
+}
+
+.address-filter{
+    -fx-border-color: white;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.separator {
+    -fx-background-color: white;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10px;
+}
+
+.list-proxy-container{
+    -fx-border-color: white;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+}
+
+.list-proxy-container:hover {
+    -fx-background-color: #162F51;
+}
+
+.list-proxy {
+    -fx-border-radius: 5;
+    -fx-padding: 5;
+    -fx-text-fill: white;
+    -fx-font-weight: 500;
+    -fx-font-family: arial;
+    -fx-background-color: transparent;
+}
+
+.list-proxy-country{
+    -fx-border-radius: 5;
+    -fx-padding: 0 0 5 5;
+    -fx-font-size: 10px;
+    -fx-text-fill: lightgray;
+    -fx-font-family: arial;
+}
+
+.toolbar-actions {
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
+}
+
+.toolbar-actions:hover{
+    -fx-background-color: #032E59;
+}
+
+.connect-status{
+    -fx-background-color: #125506;
+    -fx-padding: 15px;
+    -fx-text-fill: white;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-background-insets: 5px;
+}
