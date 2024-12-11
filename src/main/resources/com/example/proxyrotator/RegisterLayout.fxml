@@ -22,7 +22,7 @@
 
         <HBox spacing="5" fx:id="passwordContainer">
             <PasswordField fx:id="password" promptText="Enter Password" HBox.hgrow="ALWAYS" />
-            <Button fx:id="toggleButton" onAction="#togglePasswordVisibility" />
+            <Button fx:id="toggleButton" />
         </HBox>
 
         <Button text="Register" onAction="#register" style="-fx-font-size: 14px;"/>
