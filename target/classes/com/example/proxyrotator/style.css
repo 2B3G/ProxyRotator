@@ -1,10 +1,35 @@
 * {
     -fx-font-smoothing-type: gray;
     -fx-font-family: arial;
+    -fx-text-fill: white;
+}
+
+StackPane{
+   -fx-background-color: #0B192C;
+}
+
+Button{
+    -fx-background-color: #28355C;
+}
+
+Button:hover{
+    -fx-background-color: #394B82;
 }
 
 .proxy-list {
     -fx-background-color: #0B192C;
+}
+
+Hyperlink{
+    -fx-text-fill: #5B66A2;
+}
+
+TextField, PasswordField{
+    -fx-background-color: #060716;
+}
+
+TextField:hover, PasswordField:hover{
+    -fx-background-color: #101121;
 }
 
 .title {
@@ -95,4 +120,31 @@
     -fx-border-radius: 15;
     -fx-background-radius: 15;
     -fx-background-insets: 5px;
+}
+
+.country-filter .list-cell{
+    -fx-background-color: #0f223d;
+    -fx-padding: 10;
+}
+
+.country-filter .list-cell:hover{
+    -fx-background-color: #0a1729;
+}
+
+.country-filter .list-cell:filled:selected {
+    -fx-padding: 5;
+    -fx-background-color: transparent;
+}
+
+.proxy-add-menu{
+    -fx-background-color: #0f223d;
+}
+
+.proxy-add-menu .menu-item{
+    -fx-font-size: 15px;
+    -fx-padding: 8;
+}
+
+.proxy-add-menu .menu-item:hover{
+    -fx-background-color: #0a1729;
 }

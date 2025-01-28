@@ -66,7 +66,7 @@ public class MainApplication extends Application {
 
             newScene.getStylesheets().add(MainApplication.class.getResource("style.css").toExternalForm());
 
-            if(sceneName == "MainLayout.fxml")
+            if(sceneName.equals("MainLayout.fxml"))
                 mainController = loader.getController();
 
             mainStage.setScene(newScene);

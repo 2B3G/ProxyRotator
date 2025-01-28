@@ -6,7 +6,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.web.WebView?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.Group?>
 <BorderPane fx:id="mainContainer" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.proxyrotator.Controllers.MainController">
    <left>
       <VBox spacing="5.0" styleClass="proxy-list" BorderPane.alignment="CENTER">
@@ -74,7 +75,8 @@
    </left>
    <center>
       <StackPane BorderPane.alignment="CENTER" fx:id="webviewContainer">
-         <WebView fx:id="mapContainer" StackPane.alignment="CENTER"/>
+         <Group fx:id="mainMapGroup"></Group>
+<!--         <WebView fx:id="mapContainer" StackPane.alignment="CENTER"/>-->
       </StackPane>
    </center>
 </BorderPane>

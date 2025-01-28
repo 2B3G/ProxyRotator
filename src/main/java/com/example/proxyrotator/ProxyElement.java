@@ -23,6 +23,4 @@ public class ProxyElement {
         this.countryName = countryLong;
         this.countryCode = countryShort;
     }
-
-
 }

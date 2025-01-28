@@ -26,7 +26,7 @@
         <Button text="Login" onAction="#login" style="-fx-font-size: 14px;"/>
 
         <TextFlow textAlignment="CENTER">
-            <Text text="Don't have an account? Register " styleClass="text"/>
+            <Text text="Don't have an account? Register " styleClass="text"  fill="gray"/>
             <Hyperlink text="here" onMouseClicked="#goRegister" styleClass="text"/>
         </TextFlow>
 

@@ -1,26 +1,29 @@
 package com.example.proxyrotator.Controllers;
 
 import com.example.proxyrotator.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
-import netscape.javascript.JSObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainController {
@@ -35,9 +38,9 @@ public class MainController {
     @FXML
     ComboBox<String> countryChoice;
     @FXML
-    WebView mapContainer;
-    @FXML
     StackPane webviewContainer;
+    @FXML
+    Group mainMapGroup;
 
     private ObservableList<String> Countries = FXCollections.observableArrayList();
     private List<ProxyElement> Proxies = new ArrayList<>();
@@ -53,22 +56,35 @@ public class MainController {
     Logger jsLogger = new Logger();
 
     @FXML
-    public void initialize() {
+    public void initialize() throws IOException {
         Countries.add("Any");
         countryChoice.setItems(Countries);
 
-        mapContainer.setContextMenuEnabled(false);
-        WebEngine engine = mapContainer.getEngine();
+//        mapContainer.setContextMenuEnabled(false);
+//        WebEngine engine = mapContainer.getEngine();
+//
+//        engine.setJavaScriptEnabled(true);
+//        engine.getLoadWorker().stateProperty().addListener((observableValue, oldValue, newValue) ->
+//        {
+//            JSObject window = (JSObject) engine.executeScript("window");
+//            window.setMember("java", jsLogger);
+//        });
+//
+//        String htmlPath = "/com/example/proxyrotator/assets/svg/index.html";
+//        engine.load(MainController.class.getResource(htmlPath).toExternalForm());
 
-        engine.setJavaScriptEnabled(true);
-        engine.getLoadWorker().stateProperty().addListener((observableValue, oldValue, newValue) ->
-        {
-            JSObject window = (JSObject) engine.executeScript("window");
-            window.setMember("java", jsLogger);
-        });
 
-        String htmlPath = "/com/example/proxyrotator/assets/svg/index.html";
-        engine.load(MainController.class.getResource(htmlPath).toExternalForm());
+        // TODO: TRY USING THE SVG WITHOUT WEBVIEW
+        try{
+            loadSvg("/com/example/proxyrotator/assets/svg/worldmap.svg", mainMapGroup);
+        }catch (Exception e){
+            System.out.println("[ERROR] " + e.getMessage());
+            System.out.println("[ERROR] " + e.getStackTrace()[0]);
+            System.out.println(e.getClass());
+
+            MainApplication.showDialog("Map loading error", "Error while loading the map image. Try again", Alert.AlertType.ERROR);
+            Platform.exit();
+        }
 
         setAddContextMenu();
 
@@ -81,6 +97,11 @@ public class MainController {
                     addressFilter = addressFilter.substring(0, addressFilter.length() - 1);
                 }
             } else {
+                if(!Pattern.matches("[0-9]|\\.", character)){
+                    event.consume();
+                    return;
+                }
+
                 // If it's not backspace, add the character to the addressFilter
                 addressFilter += character;
             }
@@ -90,7 +111,6 @@ public class MainController {
 
         countryChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
             countryFilter = newValue;
-            System.out.println(newValue);
 
             filterProxies();
         });
@@ -109,9 +129,6 @@ public class MainController {
 
     private void filterProxies(){
         List<ProxyElement> remainingProxies = Proxies;
-
-        System.out.println(addressFilter);
-        System.out.println(countryFilter);
 
         if(!addressFilter.isEmpty() && !countryFilter.isEmpty()){
             remainingProxies = ProxyFilter.filterByBoth(Proxies, addressFilter, countryFilter);
@@ -192,15 +209,10 @@ public class MainController {
         VBox vbox = new VBox(addressLabel, countryLabel);
         HBox.setHgrow(vbox, javafx.scene.layout.Priority.ALWAYS);
 
-        CheckBox checkBox = new CheckBox("");
-        checkBox.setFocusTraversable(false);
-        HBox.setMargin(checkBox, new Insets(0, 5, 0, 5)); // Right margin of 6.0
-
         hBox.getStyleClass().add("list-proxy-container");
-        hBox.getChildren().addAll(vbox, checkBox);
+        hBox.getChildren().addAll(vbox);
         hBox.setAlignment(Pos.CENTER_LEFT);
         hBox.setId(id);
-
 
         hBox.setOnMouseClicked(e -> {
             if(e.getButton() == MouseButton.PRIMARY){
@@ -222,6 +234,7 @@ public class MainController {
 
     private void setAddContextMenu(){
         ContextMenu cm = new ContextMenu();
+        cm.getStyleClass().add("proxy-add-menu");
 
         MenuItem addOne = new MenuItem("One proxy");
         addOne.setOnAction(event -> getOneProxy());
@@ -292,5 +305,59 @@ public class MainController {
                 }
             }
         });
+    }
+
+    private void loadSvg(String resourcePath, Group parent) throws IOException {
+        InputStream reader = getClass().getResourceAsStream(resourcePath);
+
+        if(reader == null){
+            throw new FileNotFoundException();
+        }
+
+        StringBuilder fileContent = new StringBuilder();
+
+        int ch;
+        while ((ch = reader.read()) != -1)
+            fileContent.append((char) ch);
+
+        reader.close();
+
+        // search for every path in the svg
+        Pattern pathsRegex = Pattern.compile("<path (.*?)/>");
+        Matcher matcher = pathsRegex.matcher(fileContent);
+        ArrayList<HashMap<String, String>> groups = new ArrayList<>();
+
+        while(matcher.find()){
+            // split the paths attributes by the space in between them
+            String path = matcher.group(1);
+            String[] attributes = path.split("\\\"\\s(?=[a-z])");
+
+            HashMap<String, String> parsedAttrs = new HashMap<>();
+
+            // split the attribute=value by = and put it into a hashmap
+            for(int i=0;i<attributes.length;i++){
+                String[] key_pair = attributes[i].split("=");
+                parsedAttrs.put(key_pair[0], key_pair[1].replaceAll("\"", ""));
+            }
+
+            groups.add(parsedAttrs);
+        }
+
+        // make the path elements
+        ArrayList<SVGPath> paths = new ArrayList<>();
+        groups.forEach(group -> {
+            SVGPath path = new SVGPath();
+
+            System.out.println();
+
+            path.setContent(group.get("d"));
+            path.setFill(Color.web(group.get("fill")));
+            path.setStroke(Color.web(group.get("stroke")));
+            path.setStrokeWidth(Integer.parseInt(group.get("stroke-width")));
+
+            paths.add(path);
+        });
+
+        parent.getChildren().addAll(paths);
     }
 }

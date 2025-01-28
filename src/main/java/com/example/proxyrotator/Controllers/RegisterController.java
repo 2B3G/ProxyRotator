@@ -5,7 +5,6 @@ import com.example.proxyrotator.UserService;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
 
 import java.sql.SQLException;
 import java.util.regex.Pattern;
@@ -15,11 +14,11 @@ public class RegisterController extends AccountBaseController {
     TextField name;
     @FXML
     TextField last_name;
-    @FXML
-    Text errorLabel;
 
     @FXML
     private void register() {
+        errorLabel.setText("");
+
         String em = email.getText(), pass, nam = name.getText(), lastnam = last_name.getText();
         Pattern passwordPattern = Pattern.compile("^.*(?=.{8,})(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!_#$%&?]).*$");
 

@@ -9,5 +9,8 @@
         <module name="proxyRotator" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ProxyRotator" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -8,8 +8,7 @@
 <?import javafx.scene.text.TextFlow?>
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.example.proxyrotator.Controllers.RegisterController"
-           prefHeight="400.0" prefWidth="600.0">
+           fx:controller="com.example.proxyrotator.Controllers.RegisterController">
 
     <VBox alignment="CENTER" spacing="10" maxWidth="400" prefWidth="400">
         <Label text="Register" style="-fx-font-size: 24px; -fx-font-weight: bold;" styleClass="text"/>
@@ -28,12 +27,12 @@
         <Button text="Register" onAction="#register" style="-fx-font-size: 14px;"/>
 
         <TextFlow textAlignment="CENTER">
-            <Text text="Already have an account? Login " styleClass="text"/>
+            <Text text="Already have an account? Login " styleClass="text"  fill="gray"/>
             <Hyperlink text="here" onMouseClicked="#goLogin" styleClass="text"/>
         </TextFlow>
 
         <TextFlow textAlignment="CENTER">
-            <Text style="-fx-fill: red;" fx:id="errorLabel" styleClass="text"/>
+            <Label style="-fx-text-fill: red;" fx:id="errorLabel" styleClass="text"/>
         </TextFlow>
     </VBox>
 </StackPane>

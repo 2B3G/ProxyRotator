@@ -10,7 +10,13 @@ public class LoginController extends AccountBaseController {
 
     @FXML
     private void login() {
-        if (email.getText().isEmpty() || password.getText().isEmpty()) return;
+        errorLabel.setText("");
+
+        if (email.getText().isEmpty() || password.getText().isEmpty()) {
+            errorLabel.setText("Email and password field cannot be empty");
+
+            return;
+        }
 
         try {
             boolean success = UserService.login(email.getText(), password.getText());
