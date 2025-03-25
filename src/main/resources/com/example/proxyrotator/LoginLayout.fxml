@@ -31,6 +31,8 @@
         </TextFlow>
 
         <!-- Error Message Label -->
-        <Label fx:id="errorLabel" textFill="red" styleClass="text"/>
+        <TextFlow textAlignment="CENTER">
+            <Label style="-fx-text-fill: red;" fx:id="errorLabel" styleClass="text"/>
+        </TextFlow>
     </VBox>
 </StackPane>

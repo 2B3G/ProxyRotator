@@ -113,13 +113,40 @@ TextField:hover, PasswordField:hover{
     -fx-background-color: #032E59;
 }
 
-.connect-status{
-    -fx-background-color: #125506;
+.status-container{
     -fx-padding: 15px;
     -fx-text-fill: white;
-    -fx-border-radius: 15;
-    -fx-background-radius: 15;
-    -fx-background-insets: 5px;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-color: white;
+    -fx-border-width: 2;
+    -fx-border-radius: 10 10 0 0;
+}
+
+.connect-status{
+    -fx-font-size: 18;
+}
+
+.disconnect-btn{
+    -fx-background-color: #AE3239 !important;
+    -fx-font-size: 15;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.disconnect-btn:hover{
+    -fx-background-color: #88272C !important;
+}
+
+.disconnect-btn:active{
+    -fx-background-color: #962C31 !important;
+}
+
+.disconnected{
+    -fx-background-color: #113245;
+}
+
+.connected{
+    -fx-background-color: #1d6db2;
 }
 
 .country-filter .list-cell{
@@ -147,4 +174,27 @@ TextField:hover, PasswordField:hover{
 
 .proxy-add-menu .menu-item:hover{
     -fx-background-color: #0a1729;
+}
+
+.proxy-checkbox{
+    -fx-padding: 7px;
+}
+
+.proxy-checkbox .mark{
+    -fx-background-color: white;
+}
+
+.proxy-checkbox .box:hover{
+    -fx-border-color: #2073EE
+}
+.proxy-checkbox .box {
+    -fx-background-color: white;  /* Default unchecked background */
+    -fx-border-radius: 3px;
+    -fx-min-width: 20px; /* Set width */
+    -fx-min-height: 20px; /* Set height */
+}
+
+/* Change the box background when checked */
+.proxy-checkbox:selected .box {
+    -fx-background-color: #2073EE;
 }

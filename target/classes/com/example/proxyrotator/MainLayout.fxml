@@ -3,18 +3,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.shape.SVGPath?>
-<?import javafx.scene.Group?>
+<?import javafx.scene.transform.Scale?>
 <BorderPane fx:id="mainContainer" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.proxyrotator.Controllers.MainController">
    <left>
-      <VBox spacing="5.0" styleClass="proxy-list" BorderPane.alignment="CENTER">
+      <VBox spacing="5.0" styleClass="proxy-list" BorderPane.alignment="CENTER"  VBox.vgrow="ALWAYS">
          <Label alignment="CENTER" prefHeight="53.0" prefWidth="180.0" style="-fx-font-weight: bold; -fx-font-size: 2em; -fx-text-fill: white; -fx-font-family: arial;" text="Proxy Rotator" textAlignment="CENTER">
             <padding>
                <Insets bottom="10.0" top="10.0" />
-            </padding></Label>
+            </padding>
+         </Label>
          <HBox alignment="CENTER" prefHeight="76.0" prefWidth="180.0">
             <VBox alignment="CENTER_LEFT" prefHeight="48.0" prefWidth="168.0" spacing="5.0" styleClass="filters">
                <TextField fx:id="proxySearch" promptText="Search Adress" styleClass="address-filter">
@@ -33,10 +34,10 @@
             </VBox.margin>
          </HBox>
          <Separator prefHeight="0.0" style="-fx-background-radius: 10;" />
-         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" minHeight="150.0" prefWidth="180.0" style="-fx-background: null;" VBox.vgrow="ALWAYS">
-            <VBox fx:id="proxyContainer" alignment="TOP_CENTER" prefWidth="179.0" spacing="5.0" style="-fx-padding: 5;" />
+         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background: null;" VBox.vgrow="ALWAYS">
+            <VBox fx:id="proxyContainer" alignment="TOP_CENTER" prefWidth="179.0" spacing="5.0" style="-fx-padding: 5;" VBox.vgrow="ALWAYS"/>
          </ScrollPane>
-         <HBox alignment="CENTER" maxHeight="40.0" minHeight="40.0" prefHeight="40.0" style="-fx-background-color: transparent;">
+         <HBox alignment="CENTER" minHeight="40.0" prefHeight="40.0" style="-fx-background-color: transparent; margin: 0 0 10px 0">
             <Button onMouseClicked="#logout" styleClass="toolbar-actions">
                <graphic>
                   <ImageView accessibleText="Logout" fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
@@ -70,13 +71,38 @@
                   <Tooltip text="Add proxies" />
                </tooltip>
             </Button>
+            <Button fx:id="deleteBtn" styleClass="toolbar-actions" disable="true">
+               <graphic>
+                  <ImageView accessibleText="Add proxies" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                     <Image url="@assets/icons/trash.png" />
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Delete proxies" />
+               </tooltip>
+            </Button>
          </HBox>
       </VBox>
    </left>
    <center>
-      <StackPane BorderPane.alignment="CENTER" fx:id="webviewContainer">
-         <Group fx:id="mainMapGroup"></Group>
+      <StackPane StackPane.alignment="CENTER" fx:id="webviewContainer">
+         <ScrollPane fx:id="mapScroll" style="-fx-background: null;" hbarPolicy="NEVER" vbarPolicy="NEVER">
+            <Group fx:id="mainMapGroup">
+              <transforms>
+                 <Scale x="2.0" y="2.0"/>
+              </transforms>
+            </Group>
+         </ScrollPane>
 <!--         <WebView fx:id="mapContainer" StackPane.alignment="CENTER"/>-->
+         <HBox styleClass="status-container" fx:id="statusContainer" fillHeight="false" StackPane.alignment="BOTTOM_CENTER" maxHeight="38" maxWidth="900" alignment="CENTER">
+            <Label styleClass="connect-status" fx:id="connectStatus" alignment="CENTER"
+                   textAlignment="CENTER">
+               <HBox.margin>
+                  <Insets right="15"/>
+               </HBox.margin>
+            </Label>
+            <Button fx:id="disconectBtn" styleClass="disconnect-btn" minHeight="36" minWidth="60" onMouseClicked="#disconnect">Disconnect</Button>
+         </HBox>
       </StackPane>
    </center>
 </BorderPane>

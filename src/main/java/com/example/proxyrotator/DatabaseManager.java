@@ -14,11 +14,11 @@ public class DatabaseManager {
         connection = DriverManager.getConnection(url, user, password);
     }
 
-    public static int executeUpdate(String query, Object... params) throws SQLException {
+    public static void executeUpdate(String query, Object... params) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query);
         setParameters(statement, params);
 
-        return statement.executeUpdate();
+        statement.executeUpdate();
     }
 
     public static ResultSet executeQuery(String query, Object... params) throws SQLException {

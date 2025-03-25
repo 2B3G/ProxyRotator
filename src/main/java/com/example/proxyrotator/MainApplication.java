@@ -4,6 +4,7 @@ import com.example.proxyrotator.Controllers.MainController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
@@ -18,7 +19,7 @@ public class MainApplication extends Application {
     public static MainController mainController;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, SQLException {
         try{
             DatabaseManager.connect();
         }catch (SQLException e){
@@ -30,17 +31,20 @@ public class MainApplication extends Application {
         }
 
         mainStage = stage;
-        FXMLLoader fxmlLoader;
+        Parent mainParent;
 
         if(UserPrefs.getUserId() != -1){
-            fxmlLoader = new FXMLLoader(MainApplication.class.getResource("MainLayout.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("MainLayout.fxml"));
+            mainParent = fxmlLoader.load();
+
             mainController = fxmlLoader.getController();
         }
         else{
-            fxmlLoader = new FXMLLoader(MainApplication.class.getResource("LoginLayout.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("LoginLayout.fxml"));
+            mainParent = fxmlLoader.load();
         }
 
-        Scene scene = new Scene(fxmlLoader.load(), MainApplication.WINDOW_WIDTH,  MainApplication.WINDOW_HEIGHT);
+        Scene scene = new Scene(mainParent, MainApplication.WINDOW_WIDTH,  MainApplication.WINDOW_HEIGHT);
         stage.setTitle("Proxy Rotator");
 
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());

@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -14,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 
@@ -25,12 +27,17 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MainController {
+    public Button disconectBtn;
+    public HBox statusContainer;
     @FXML
     private Button refreshBtn;
     @FXML
     private Button addBtn;
+    @FXML
+    private Button deleteBtn;
     @FXML
     private TextField proxySearch;
     @FXML
@@ -40,26 +47,26 @@ public class MainController {
     @FXML
     StackPane webviewContainer;
     @FXML
+    ScrollPane mapScroll;
+    @FXML
     Group mainMapGroup;
+    @FXML
+    Label connectStatus;
 
     private ObservableList<String> Countries = FXCollections.observableArrayList();
     private List<ProxyElement> Proxies = new ArrayList<>();
+    private List<ProxyElement> proxiesToDelete = new ArrayList<>();
 
     private String addressFilter = "", countryFilter = "";
 
-    private class Logger{
-        public void log(String message){
-            System.out.println(message);
-        }
-    }
-
-    Logger jsLogger = new Logger();
+    private int checkedCounter = 0;
 
     @FXML
     public void initialize() throws IOException {
         Countries.add("Any");
         countryChoice.setItems(Countries);
 
+        // FOR THE WEBVIEW MAP IF NEEDED
 //        mapContainer.setContextMenuEnabled(false);
 //        WebEngine engine = mapContainer.getEngine();
 //
@@ -73,58 +80,80 @@ public class MainController {
 //        String htmlPath = "/com/example/proxyrotator/assets/svg/index.html";
 //        engine.load(MainController.class.getResource(htmlPath).toExternalForm());
 
-
-        // TODO: TRY USING THE SVG WITHOUT WEBVIEW
         try{
             loadSvg("/com/example/proxyrotator/assets/svg/worldmap.svg", mainMapGroup);
         }catch (Exception e){
-            System.out.println("[ERROR] " + e.getMessage());
-            System.out.println("[ERROR] " + e.getStackTrace()[0]);
-            System.out.println(e.getClass());
+            e.printStackTrace();
 
-            MainApplication.showDialog("Map loading error", "Error while loading the map image. Try again", Alert.AlertType.ERROR);
+            MainApplication.showDialog("Map loading error", "Error while loading the map. Try again", Alert.AlertType.ERROR);
             Platform.exit();
         }
 
         setAddContextMenu();
 
-        proxySearch.addEventFilter(KeyEvent.KEY_TYPED, event -> {
-            String character = event.getCharacter();
-
-            if (character.equals("\b")) {
-                // If the backspace key is pressed, remove the last character from addressFilter
-                if (!addressFilter.isEmpty()) {
-                    addressFilter = addressFilter.substring(0, addressFilter.length() - 1);
-                }
-            } else {
-                if(!Pattern.matches("[0-9]|\\.", character)){
-                    event.consume();
-                    return;
-                }
-
-                // If it's not backspace, add the character to the addressFilter
-                addressFilter += character;
-            }
-
+        proxySearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            addressFilter = newValue;
             filterProxies();
         });
 
         countryChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
             countryFilter = newValue;
-
             filterProxies();
         });
 
-        // TODO : finish this connection status text. it will be green if connected, red if disconnected, it will show a big nice text like
+        deleteBtn.setOnMouseClicked((handler) -> {
+            if(handler.getButton() == MouseButton.PRIMARY) try {
+                int count = removeProxies(proxiesToDelete);
+
+                MainApplication.showDialog("Success", "Deleted " + count + " proxies", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                System.out.println("[ERROR] SQL ERROR WHILE DELETING PROXIES");
+                e.printStackTrace();
+
+                MainApplication.showDialog("Error", "SQL error encountered when deleting proxies. Try again later", Alert.AlertType.ERROR);
+            }
+        });
+
+        refreshBtn.setOnMouseClicked(handler -> {
+            if(handler.getButton() == MouseButton.PRIMARY){
+               try{
+                   List<ProxyElement> badProxies = ProxyManager.checkProxies(Proxies);
+                   int count = removeProxies(badProxies);
+
+                   MainApplication.showDialog("Info", "Found and removed " + count + " unusable proxies", Alert.AlertType.INFORMATION);
+               }catch (RuntimeException | SQLException e) {
+                   e.printStackTrace();
+
+                   MainApplication.showDialog("Error", "Error encountered an error while checking proxies", Alert.AlertType.ERROR);
+               }
+            }
+        });
+
         // CONNECTED or DISCONNECTED in the middle. then on the left will be the ip address with the port and on the right there will be the country
-        Label bottomLabel = new Label("This is at the bottom");
-        bottomLabel.getStyleClass().add("connect-status");
-
-        StackPane.setAlignment(bottomLabel, javafx.geometry.Pos.BOTTOM_CENTER);
-
-        webviewContainer.getChildren().add(bottomLabel);
+        reloadConnStatus();
 
         reloadProxies();
+    }
+
+    @FXML
+    private void disconnect(){
+        ProxyManager.disableProxy();
+        reloadConnStatus();
+    }
+
+    private int removeProxies(List<ProxyElement> toDelete) throws SQLException {
+        if(toDelete.isEmpty()) return 0;
+
+        ProxyManager.deleteProxies(toDelete);
+        Proxies = Proxies.stream().filter(proxy -> !toDelete.contains(proxy)).collect(Collectors.toList());
+
+        int count = toDelete.toArray().length;
+        toDelete.clear();
+        checkedCounter = 0;
+        deleteBtn.setDisable(true);
+
+        MainApplication.mainController.reloadProxies();
+        return count;
     }
 
     private void filterProxies(){
@@ -183,6 +212,7 @@ public class MainController {
             List<ProxyElement> proxies = ProxyManager.getProxies();
 
             proxyContainer.getChildren().clear();
+            Countries.clear();
 
             proxies.forEach(proxy -> {
                 Proxies.add(Proxies.toArray().length, proxy);
@@ -209,8 +239,20 @@ public class MainController {
         VBox vbox = new VBox(addressLabel, countryLabel);
         HBox.setHgrow(vbox, javafx.scene.layout.Priority.ALWAYS);
 
+        CheckBox checkBox = new CheckBox();
+        checkBox.getStyleClass().add("proxy-checkbox");
+        checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal){
+                proxiesToDelete.add(proxy);
+                if(checkedCounter++ == 0) deleteBtn.setDisable(false);
+            }else{
+                proxiesToDelete.remove(proxy);
+                if(--checkedCounter == 0) deleteBtn.setDisable(true);
+            }
+        });
+
         hBox.getStyleClass().add("list-proxy-container");
-        hBox.getChildren().addAll(vbox);
+        hBox.getChildren().addAll(checkBox, vbox);
         hBox.setAlignment(Pos.CENTER_LEFT);
         hBox.setId(id);
 
@@ -218,12 +260,32 @@ public class MainController {
             if(e.getButton() == MouseButton.PRIMARY){
                 System.out.println(String.format("Proxy address : %s , country code : %s", proxy.getAddress(), proxy.getCountryCode()));
 
-                // TODO : show on the map and make some cool animations or smth
+                // TODO : show on the map and make some cool animation or smth
+                Circle countryCodeRes = (Circle) mainMapGroup.lookup("." + proxy.getCountryCode() + "-point");
+                focusPoint(countryCodeRes);
+
+                ProxyManager.setProxy(proxy);
+                reloadConnStatus();
             }
         });
 
         proxyContainer.getChildren().add(hBox);
         if(!Countries.contains(proxy.getCountryName())) Countries.add(proxy.getCountryName());
+    }
+
+    private void focusPoint(Circle point){
+        double x = point.getCenterX();
+        double y = point.getCenterY();
+
+        double centerX =  webviewContainer.getBoundsInLocal().getCenterX();
+        double centerY = webviewContainer.getBoundsInLocal().getCenterY();
+
+        System.out.println("x offset : " + (x - centerX));
+        System.out.println("y offset : " + (y - centerY));
+
+        webviewContainer.setTranslateX(x - centerX);
+        webviewContainer.setTranslateY(y - centerY);
+        // TODO : doesnt even work fr
     }
 
     @FXML
@@ -287,7 +349,7 @@ public class MainController {
                 Pattern pattern = Pattern.compile(regex);
 
                 if(!pattern.matcher(input.getText()).find()){
-                    MainApplication.showDialog("Invalid proxy", "The proxy you tried to add is invalid, try again", Alert.AlertType.ERROR);
+                    MainApplication.showDialog("Invalid proxy", "The proxy you tried to add is invalid. Ensure this pattern - address:port, try again", Alert.AlertType.ERROR);
 
                     return;
                 }
@@ -323,13 +385,13 @@ public class MainController {
         reader.close();
 
         // search for every path in the svg
-        Pattern pathsRegex = Pattern.compile("<path (.*?)/>");
+        Pattern pathsRegex = Pattern.compile("<(path|circle) (.*?)/>");
         Matcher matcher = pathsRegex.matcher(fileContent);
         ArrayList<HashMap<String, String>> groups = new ArrayList<>();
 
         while(matcher.find()){
             // split the paths attributes by the space in between them
-            String path = matcher.group(1);
+            String path = matcher.group(2);
             String[] attributes = path.split("\\\"\\s(?=[a-z])");
 
             HashMap<String, String> parsedAttrs = new HashMap<>();
@@ -344,20 +406,72 @@ public class MainController {
         }
 
         // make the path elements
-        ArrayList<SVGPath> paths = new ArrayList<>();
+        ArrayList<Node> paths = new ArrayList<>();
         groups.forEach(group -> {
             SVGPath path = new SVGPath();
 
-            System.out.println();
+            // use it later for finding the dot to focus the map on when user selects proxy
+            String selector = group.get("class") != null ? group.get("class") : group.get("id");
 
-            path.setContent(group.get("d"));
-            path.setFill(Color.web(group.get("fill")));
-            path.setStroke(Color.web(group.get("stroke")));
-            path.setStrokeWidth(Integer.parseInt(group.get("stroke-width")));
+            // if the element is a acircle (for map zooming)
+            if(group.containsKey("r")){
+                Circle circle = new Circle(
+                        Double.parseDouble(group.get("cx")),
+                        Double.parseDouble(group.get("cy")), // cy
+                        1 // r
+                );
+                // Convert SVG attributes to JavaFX properties
+                circle.setFill(Color.TRANSPARENT); // Equivalent to fill="none"
+                circle.setStroke(Color.TRANSPARENT); // Equivalent to stroke="none"
+                circle.setOpacity(0); // Set opacity
 
-            paths.add(path);
+                circle.getStyleClass().add(selector);
+
+                paths.add(circle);
+            }else{
+                path.getStyleClass().add(selector);
+                path.setContent(group.get("d"));
+                path.setFill(Color.web(group.get("fill")));
+                path.setStroke(Color.web(group.get("stroke")));
+                path.setStrokeWidth(Integer.parseInt(group.get("stroke-width")));
+
+                paths.add(path);
+            }
         });
 
+//        Rectangle clip = new Rectangle(500, 500);
+//        mainMapGroup.setClip(clip);
+//
+//        parent.sceneProperty().addListener((obsa, oldScene, newScene) -> {
+//            newScene.widthProperty().addListener((obs, oldVal, newVal) -> {
+//                double scaleFactor = newVal.doubleValue() / oldVal.doubleValue();
+//                parent.setScaleX(scaleFactor);
+//            });
+//            newScene.heightProperty().addListener((obs, oldVal, newVal) -> {
+//                double scaleFactor = newVal.doubleValue() / oldVal.doubleValue();
+//
+//                parent.setScaleY(scaleFactor);
+//            });
+//        });
+
         parent.getChildren().addAll(paths);
+    }
+
+    private void reloadConnStatus(){
+        String proxySet = ProxyManager.getProxySet();
+
+        System.out.print(proxySet);
+        if(proxySet == null){
+            connectStatus.setText("Disconnected");
+            statusContainer.getStyleClass().add("disconnected");
+            disconectBtn.setVisible(false);
+            disconectBtn.setManaged(false);
+        }
+        else{
+            connectStatus.setText("Connected to " + proxySet + " " + ProxyManager.getProxyCountry(proxySet)[0]);
+            statusContainer.getStyleClass().add("connected");
+            disconectBtn.setVisible(true);
+            disconectBtn.setManaged(true);
+        }
     }
 }
