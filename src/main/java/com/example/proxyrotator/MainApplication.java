@@ -37,6 +37,8 @@ public class MainApplication extends Application {
             FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("MainLayout.fxml"));
             mainParent = fxmlLoader.load();
 
+            stage.setResizable(false);
+
             mainController = fxmlLoader.getController();
         }
         else{
@@ -52,8 +54,8 @@ public class MainApplication extends Application {
         // process doesn't close without this
         stage.setOnCloseRequest(ProxyManager::closeExecutor);
 
-        stage.setMinHeight(400);
-        stage.setMinWidth(500);
+        stage.setHeight(800);
+        stage.setWidth(1100);
         stage.setScene(scene);
 
         stage.show();

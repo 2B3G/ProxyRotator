@@ -1,6 +1,10 @@
 package com.example.proxyrotator.Controllers;
 
 import com.example.proxyrotator.*;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,13 +15,12 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,8 +32,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
 public class MainController {
     public Button disconectBtn;
+
     public HBox statusContainer;
     @FXML
     private Button refreshBtn;
@@ -52,10 +57,15 @@ public class MainController {
     Group mainMapGroup;
     @FXML
     Label connectStatus;
+    @FXML
+    BorderPane mainContainer;
+    @FXML
+    Pane mapContainer;
 
-    private ObservableList<String> Countries = FXCollections.observableArrayList();
+    private final ObservableList<String> Countries = FXCollections.observableArrayList();
     private List<ProxyElement> Proxies = new ArrayList<>();
-    private List<ProxyElement> proxiesToDelete = new ArrayList<>();
+    private final List<ProxyElement> proxiesToDelete = new ArrayList<>();
+    private Circle currentCountry;
 
     private String addressFilter = "", countryFilter = "";
 
@@ -66,22 +76,9 @@ public class MainController {
         Countries.add("Any");
         countryChoice.setItems(Countries);
 
-        // FOR THE WEBVIEW MAP IF NEEDED
-//        mapContainer.setContextMenuEnabled(false);
-//        WebEngine engine = mapContainer.getEngine();
-//
-//        engine.setJavaScriptEnabled(true);
-//        engine.getLoadWorker().stateProperty().addListener((observableValue, oldValue, newValue) ->
-//        {
-//            JSObject window = (JSObject) engine.executeScript("window");
-//            window.setMember("java", jsLogger);
-//        });
-//
-//        String htmlPath = "/com/example/proxyrotator/assets/svg/index.html";
-//        engine.load(MainController.class.getResource(htmlPath).toExternalForm());
-
         try{
             loadSvg("/com/example/proxyrotator/assets/svg/worldmap.svg", mainMapGroup);
+            resetFocus();
         }catch (Exception e){
             e.printStackTrace();
 
@@ -129,16 +126,17 @@ public class MainController {
             }
         });
 
-        // CONNECTED or DISCONNECTED in the middle. then on the left will be the ip address with the port and on the right there will be the country
+        Platform.runLater(this::resetFocus);
         reloadConnStatus();
-
         reloadProxies();
     }
 
     @FXML
     private void disconnect(){
         ProxyManager.disableProxy();
+        currentCountry = null;
         reloadConnStatus();
+        resetFocus();
     }
 
     private int removeProxies(List<ProxyElement> toDelete) throws SQLException {
@@ -213,6 +211,7 @@ public class MainController {
 
             proxyContainer.getChildren().clear();
             Countries.clear();
+            Countries.add("Any");
 
             proxies.forEach(proxy -> {
                 Proxies.add(Proxies.toArray().length, proxy);
@@ -274,18 +273,28 @@ public class MainController {
     }
 
     private void focusPoint(Circle point){
-        double x = point.getCenterX();
-        double y = point.getCenterY();
+        double x = point.getBoundsInParent().getCenterX();
+        double y = point.getBoundsInParent().getCenterY();
 
-        double centerX =  webviewContainer.getBoundsInLocal().getCenterX();
-        double centerY = webviewContainer.getBoundsInLocal().getCenterY();
+        double centerX = mapScroll.getViewportBounds().getWidth() / 2;
+        double centerY = mapScroll.getViewportBounds().getHeight() / 2;
 
-        System.out.println("x offset : " + (x - centerX));
-        System.out.println("y offset : " + (y - centerY));
+        double xOffset = centerX - x;
+        double yOffset = centerY - y;
 
-        webviewContainer.setTranslateX(x - centerX);
-        webviewContainer.setTranslateY(y - centerY);
-        // TODO : doesnt even work fr
+        Timeline timeline = new Timeline();
+
+        KeyValue kvX = new KeyValue(mapContainer.translateXProperty(), mainMapGroup.getTranslateX() + xOffset, Interpolator.EASE_BOTH);
+        KeyValue kvY = new KeyValue(mapContainer.translateYProperty(), mainMapGroup.getTranslateY() + yOffset, Interpolator.EASE_BOTH);
+
+        KeyFrame kf = new KeyFrame(Duration.millis(900), kvX, kvY);
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
+
+    }
+
+    private void resetFocus(){
+       focusPoint((Circle) mainMapGroup.lookup(".DE-point"));
     }
 
     @FXML
@@ -410,7 +419,7 @@ public class MainController {
         groups.forEach(group -> {
             SVGPath path = new SVGPath();
 
-            // use it later for finding the dot to focus the map on when user selects proxy
+            // use this later for finding the dot to focus the map on when user selects proxy
             String selector = group.get("class") != null ? group.get("class") : group.get("id");
 
             // if the element is a acircle (for map zooming)

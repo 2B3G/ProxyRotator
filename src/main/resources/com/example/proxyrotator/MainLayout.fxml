@@ -85,13 +85,12 @@
       </VBox>
    </left>
    <center>
-      <StackPane StackPane.alignment="CENTER" fx:id="webviewContainer">
+      <StackPane StackPane.alignment="CENTER" fx:id="webviewContainer" >
          <ScrollPane fx:id="mapScroll" style="-fx-background: null;" hbarPolicy="NEVER" vbarPolicy="NEVER">
-            <Group fx:id="mainMapGroup">
-              <transforms>
-                 <Scale x="2.0" y="2.0"/>
-              </transforms>
-            </Group>
+           <Pane fx:id="mapContainer">
+              <Group fx:id="mainMapGroup">
+              </Group>
+           </Pane>
          </ScrollPane>
 <!--         <WebView fx:id="mapContainer" StackPane.alignment="CENTER"/>-->
          <HBox styleClass="status-container" fx:id="statusContainer" fillHeight="false" StackPane.alignment="BOTTOM_CENTER" maxHeight="38" maxWidth="900" alignment="CENTER">
